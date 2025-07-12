@@ -1,0 +1,62 @@
+name: build
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#permissions
+permissions:
+  contents: read
+
+on:
+  push:
+    branches:
+      - 'main'
+    tags:
+      - '*'
+    paths-ignore:
+      - '**.md'
+  pull_request:
+    paths-ignore:
+      - '**.md'
+
+jobs:
+  build:
+    uses: crazy-max/.github/.github/workflows/bake-distribute-mp.yml@a94383ec9e125b23907fb6fcebf7ff87964595e5
+    permissions:
+      # same as global permissions
+      contents: read
+      # required to push to GHCR
+      packages: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          -
+            image: crazymax/scrutiny
+            login-registry: docker.io
+            login-username: crazymax
+            login-secret-key: DOCKER_PASSWORD
+          -
+            image: ghcr.io/crazy-max/scrutiny
+            login-registry: ghcr.io
+            login-username: ${{ github.repository_owner }}
+            login-secret-key: GITHUB_TOKEN
+    with:
+      target: image-all
+      push: ${{ github.event_name != 'pull_request' }}
+      cache: true
+      cache-scope: build
+      meta-image: ${{ matrix.image }}
+      meta-tags: |
+        type=match,pattern=(.*)-r,group=1
+        type=ref,event=pr
+        type=edge
+      meta-labels: |
+        org.opencontainers.image.title=scrutiny
+        org.opencontainers.image.description=WebUI for smartd S.M.A.R.T monitoring
+        org.opencontainers.image.vendor=CrazyMax
+      login-registry: ${{ matrix.login-registry }}
+      login-username: ${{ matrix.login-username }}
+    secrets:
+      login-password: ${{ secrets[matrix.login-secret-key] }}
