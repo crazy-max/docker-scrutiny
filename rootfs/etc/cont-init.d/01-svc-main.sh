@@ -10,6 +10,8 @@ until curl --output /dev/null --silent --head --fail "http://${SCRUTINY_WEB_INFL
 done
 echo "InfluxDB is ready!"
 
+echo "S.M.A.R.T version: $(apk list --installed smartmontools | cut -d' ' -f1 | cut -d'-' -f2-)"
+
 echo "Running Scrutiny collector..."
 scrutiny-collector-metrics run
 
