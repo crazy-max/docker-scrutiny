@@ -1,0 +1,35 @@
+name: scrutiny
+
+services:
+  influxdb:
+    image: influxdb:2.2-alpine
+    container_name: scrutiny_influxdb
+    networks:
+      - scrutiny
+    environment:
+      - "INFLUXDB_ADMIN_USER"
+      - "INFLUXDB_ADMIN_PASSWORD"
+      - "INFLUXDB_DB"
+    restart: always
+
+  scrutiny:
+    image: ${SCRUTINY_IMAGE:-crazymax/scrutiny}
+    container_name: ${SCRUTINY_CONTAINER:-scrutiny}
+    networks:
+      - scrutiny
+    depends_on:
+      - influxdb
+    ports:
+      - target: 8080
+        published: 8080
+        protocol: tcp
+    environment:
+      SCRUTINY_WEB_INFLUXDB_HOST: influxdb
+      SCRUTINY_WEB_INFLUXDB_INIT_USERNAME: ${INFLUXDB_ADMIN_USER}
+      SCRUTINY_WEB_INFLUXDB_INIT_PASSWORD: ${INFLUXDB_ADMIN_PASSWORD}
+      SCRUTINY_WEB_INFLUXDB_TLS_INSECURE_SKIP_VERIFY: true
+    restart: always
+
+networks:
+  scrutiny:
+    name: scrutiny
