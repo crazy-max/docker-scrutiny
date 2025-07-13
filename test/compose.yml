@@ -19,15 +19,23 @@ services:
       - scrutiny
     depends_on:
       - influxdb
+    cap_add:
+      - SYS_RAWIO
+      - SYS_ADMIN
     ports:
       - target: 8080
         published: 8080
         protocol: tcp
+    volumes:
+      - "/run/udev:/run/udev:ro"
     environment:
       SCRUTINY_WEB_INFLUXDB_HOST: influxdb
       SCRUTINY_WEB_INFLUXDB_INIT_USERNAME: ${INFLUXDB_ADMIN_USER}
       SCRUTINY_WEB_INFLUXDB_INIT_PASSWORD: ${INFLUXDB_ADMIN_PASSWORD}
       SCRUTINY_WEB_INFLUXDB_TLS_INSECURE_SKIP_VERIFY: true
+    devices:
+      - "/dev/sda"
+      - "/dev/sdb"
     restart: always
 
 networks:
