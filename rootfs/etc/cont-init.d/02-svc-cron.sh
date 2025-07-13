@@ -12,7 +12,7 @@ touch ${CRONTAB_PATH}/scrutiny
 
 # Cron
 if [ -n "$COLLECTOR_CRON_SCHEDULE" ]; then
-  echo "Creating Scrutiny collector cron task with the following period fields : $COLLECTOR_CRON_SCHEDULE"
+  echo "Creating scrutiny collector cron task with the following period fields : $COLLECTOR_CRON_SCHEDULE"
   echo "${COLLECTOR_CRON_SCHEDULE} scrutiny-collector-metrics run" >> ${CRONTAB_PATH}/scrutiny
 else
   echo "COLLECTOR_CRON_SCHEDULE env var empty..."
